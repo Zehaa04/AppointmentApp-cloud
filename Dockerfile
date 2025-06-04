@@ -1,8 +1,7 @@
 FROM amazonlinux:2023
 
 RUN dnf -y update && \
-    dnf -y install nodejs && \
-    dnf -y install postgresql15
+    dnf -y install nodejs 
 
 WORKDIR /app
 
