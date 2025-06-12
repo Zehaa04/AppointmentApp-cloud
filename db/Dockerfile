@@ -1,15 +1,19 @@
 FROM amazonlinux:2023
 
+ENV PGDATA=/var/lib/pgsql/15/data
+
 RUN yum update -y && \
-    yum install -y postgresql15-server postgresql15 && \
+    yum install -y postgresql15-server postgresql15 sudo procps which && \
     yum clean all
 
-ENV POSTGRES_DB=postgres
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=postgres
+RUN mkdir -p "$PGDATA" && \
+    chown -R postgres:postgres /var/lib/pgsql
 
-RUN /usr/bin/postgresql-15-setup initdb
 
+COPY init.sql /docker-entrypoint-initdb.d/
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER postgres
 EXPOSE 5432
-
-CMD ["/usr/bin/postgres", "-D", "/var/lib/pgsql/15/data"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
