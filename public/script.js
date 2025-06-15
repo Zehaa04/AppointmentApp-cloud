@@ -1,43 +1,72 @@
 const calendarDiv = document.getElementById('calendar');
 const linkOutput = document.getElementById('linkOutput');
-const today = new Date();
+const monthYear = document.getElementById('monthYear');
+const prevBtn = document.getElementById('prevMonth');
+const nextBtn = document.getElementById('nextMonth');
 
-for (let i = 0; i < 30; i++) {
-  const day = new Date();
-  day.setDate(today.getDate() + i);
+let currentDate = new Date();
 
-  const div = document.createElement('div');
-  div.className = 'day';
-  const formattedDate = day.toISOString().split('T')[0];
-  div.innerText = formattedDate;
+function renderCalendar(date) {
+  calendarDiv.innerHTML = '';
+  const year = date.getFullYear();
+  const month = date.getMonth();
 
-  div.onclick = async () => {
-    const time = prompt(`Enter time for the appointment on ${formattedDate} (HH:MM):`);
-    
-    
-    if (!time || !/^\d{2}:\d{2}$/.test(time)) {
-      alert("Invalid time format. Please use HH:MM.");
-      return;
-    }
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
 
-    try {
-      const response = await fetch('/api/appointments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: formattedDate, time })
-      });
+  const startDay = (firstDay.getDay() + 6) % 7; // Convert Sunday (0) to 6
+  const totalDays = lastDay.getDate();
 
-      const data = await response.json();
+  monthYear.innerText = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
 
-      if (data.token) {
-        linkOutput.innerHTML = `<p>Send this link:</p><a href="/respond/${data.token}" target="_blank">/respond/${data.token}</a>`;
-      } else {
-        linkOutput.innerHTML = `<p>Error: ${data.error || 'Unknown error'}</p>`;
+  for (let i = 0; i < startDay; i++) {
+    calendarDiv.appendChild(document.createElement('div'));
+  }
+
+  for (let day = 1; day <= totalDays; day++) {
+    const div = document.createElement('div');
+    div.className = 'day';
+    const formattedDate = new Date(year, month, day).toISOString().split('T')[0];
+    div.innerText = day;
+
+    div.onclick = async () => {
+      const time = prompt(`Enter time for the appointment on ${formattedDate} (HH:MM):`);
+      if (!time || !/^\d{2}:\d{2}$/.test(time)) {
+        alert("Invalid time format. Please use HH:MM.");
+        return;
       }
-    } catch (err) {
-      linkOutput.innerHTML = `<p>Error: ${err.message}</p>`;
-    }
-  };
 
-  calendarDiv.appendChild(div);
+      try {
+        const response = await fetch('/api/appointments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: formattedDate, time })
+        });
+
+        const data = await response.json();
+
+        if (data.token) {
+          linkOutput.innerHTML = `<p>Send this link:</p><a href="/respond/${data.token}" target="_blank">/respond/${data.token}</a>`;
+        } else {
+          linkOutput.innerHTML = `<p>Error: ${data.error || 'Unknown error'}</p>`;
+        }
+      } catch (err) {
+        linkOutput.innerHTML = `<p>Error: ${err.message}</p>`;
+      }
+    };
+
+    calendarDiv.appendChild(div);
+  }
 }
+
+prevBtn.onclick = () => {
+  currentDate.setMonth(currentDate.getMonth() - 1);
+  renderCalendar(currentDate);
+};
+
+nextBtn.onclick = () => {
+  currentDate.setMonth(currentDate.getMonth() + 1);
+  renderCalendar(currentDate);
+};
+
+renderCalendar(currentDate);

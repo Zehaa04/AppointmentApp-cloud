@@ -1,16 +1,33 @@
-.calendar {
+.calendar-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+#monthYear {
+  margin: 0;
+}
+
+.weekdays, .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
   max-width: 400px;
-  margin: 20px auto;
+  margin: 10px auto;
+  text-align: center;
+}
+
+.weekdays div {
+  font-weight: bold;
+  background-color: #ddd;
+  padding: 10px;
 }
 
 .day {
   padding: 15px;
   background: #f2f2f2;
   border: 1px solid #ccc;
-  text-align: center;
   cursor: pointer;
 }
 

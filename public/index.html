@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-
 <html>
 <head>
   <title>Appointment App</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
   <h1>Select a Date</h1>
+  <div class="calendar-header">
+    <button id="prevMonth">&lt;</button>
+    <h2 id="monthYear"></h2>
+    <button id="nextMonth">&gt;</button>
+  </div>
+
+  <div class="weekdays">
+    <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+  </div>
+
   <div class="calendar" id="calendar"></div>
+
   <p id="linkOutput"></p>
 
   <script src="script.js"></script>
 </body>
 </html>
-
-
