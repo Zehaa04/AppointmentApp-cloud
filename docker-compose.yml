@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     build:
@@ -14,10 +16,11 @@ services:
     networks:
       - app-network
 
-  app:
+  app1:
     build: .
-    ports:
-      - "8999:8999"
+    container_name: app1
+    expose:
+      - "8999"
     environment:
       - DB_HOST=db
       - DB_USER=postgres
@@ -26,7 +29,35 @@ services:
     depends_on:
       - db
     networks:
-      - app-network  
+      - app-network
+
+  app2:
+    build: .
+    container_name: app2
+    expose:
+      - "8999"
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=appointmentdb
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  haproxy:
+    image: haproxy:2.8
+    container_name: haproxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - app1
+      - app2
+    networks:
+      - app-network
 
 volumes:
   pgdata:
