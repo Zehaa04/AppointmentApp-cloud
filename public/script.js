@@ -14,7 +14,7 @@ function renderCalendar(date) {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
-  const startDay = (firstDay.getDay() + 6) % 7; // Convert Sunday (0) to 6
+  const startDay = (firstDay.getDay() + 6) % 7;
   const totalDays = lastDay.getDate();
 
   monthYear.innerText = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
@@ -26,7 +26,7 @@ function renderCalendar(date) {
   for (let day = 1; day <= totalDays; day++) {
     const div = document.createElement('div');
     div.className = 'day';
-    const formattedDate = new Date(year, month, day).toISOString().split('T')[0];
+    const formattedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
     div.innerText = day;
 
     div.onclick = async () => {
