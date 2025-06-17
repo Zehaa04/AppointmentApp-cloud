@@ -6,7 +6,13 @@ CREATE TABLE appointments (
   id SERIAL PRIMARY KEY,
   date DATE NOT NULL,
   time TIME NOT NULL,
-  name VARCHAR(100),
-  token VARCHAR(255) UNIQUE NOT NULL,
-  response VARCHAR(10)
+  token VARCHAR UNIQUE NOT NULL
 );
+
+CREATE TABLE responses (
+  id SERIAL PRIMARY KEY,
+  appointment_id INTEGER REFERENCES appointments(id),
+  name VARCHAR NOT NULL,
+  response VARCHAR CHECK (response IN ('yes', 'no')) NOT NULL
+);
+
