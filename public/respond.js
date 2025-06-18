@@ -15,8 +15,34 @@ async function loadAppointment() {
     return;
   }
 
-  appointmentDetails.innerHTML = `<p>Appointment on <strong>${data.date}</strong> at <strong>${data.time}</strong></p>`;
-  renderResponses(data.responses);
+  try {
+    const dateParts = data.date.split('-');
+    const timeParts = data.time.split(':');
+
+    const year = parseInt(dateParts[0], 10);
+    const month = parseInt(dateParts[1], 10) - 1;
+    const day = parseInt(dateParts[2], 10);
+
+    const hour = parseInt(timeParts[0], 10);
+    const minute = parseInt(timeParts[1], 10);
+    const second = timeParts[2] ? parseInt(timeParts[2], 10) : 0;
+
+    const dateTime = new Date(year, month, day, hour, minute, second);
+
+    if (isNaN(dateTime.getTime())) {
+      throw new Error();
+    }
+
+    const formattedDateTime = dateTime.toLocaleString(undefined, {
+      dateStyle: 'long',
+      timeStyle: 'short'
+    });
+
+    appointmentDetails.innerHTML = `<p>Appointment on <strong>${formattedDateTime}</strong></p>`;
+    renderResponses(data.responses);
+  } catch {
+    appointmentDetails.innerHTML = `<p style="color:red">Could not format appointment date/time.</p>`;
+  }
 }
 
 function renderResponses(responses) {
