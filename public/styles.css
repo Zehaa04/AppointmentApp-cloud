@@ -31,6 +31,11 @@
   cursor: pointer;
 }
 
+.day.selected {
+  background-color: #4caf50;
+  color: white;
+}
+
 .day:hover {
   background: #d0e8ff;
 }

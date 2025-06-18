@@ -6,7 +6,7 @@ CREATE TABLE appointments (
   id SERIAL PRIMARY KEY,
   date DATE NOT NULL,
   time TIME NOT NULL,
-  token VARCHAR UNIQUE NOT NULL
+  token VARCHAR NOT NULL
 );
 
 CREATE TABLE responses (
