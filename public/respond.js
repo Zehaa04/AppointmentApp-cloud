@@ -1,9 +1,8 @@
 const token = window.location.pathname.split("/").pop();
-
 const appointmentDetails = document.getElementById('appointmentDetails');
-const form = document.getElementById('responseForm');
 const nameInput = document.getElementById('name');
-const responseStats = document.getElementById('responseStats');
+
+let appointments = [];
 
 async function loadAppointment() {
   const res = await fetch(`/api/appointments/${token}/respond`);
@@ -11,92 +10,85 @@ async function loadAppointment() {
 
   if (data.error) {
     appointmentDetails.innerHTML = `<p style="color:red">${data.error}</p>`;
-    form.style.display = 'none';
     return;
   }
 
-  try {
-    const dateParts = data.date.split('-');
-    const timeParts = data.time.split(':');
+  appointments = data.appointments;
+  appointmentDetails.innerHTML = '';
 
-    const year = parseInt(dateParts[0], 10);
-    const month = parseInt(dateParts[1], 10) - 1;
-    const day = parseInt(dateParts[2], 10);
-
-    const hour = parseInt(timeParts[0], 10);
-    const minute = parseInt(timeParts[1], 10);
-    const second = timeParts[2] ? parseInt(timeParts[2], 10) : 0;
-
-    const dateTime = new Date(year, month, day, hour, minute, second);
-
-    if (isNaN(dateTime.getTime())) {
-      throw new Error();
-    }
-
-    const formattedDateTime = dateTime.toLocaleString(undefined, {
+  appointments.forEach((appt, index) => {
+    const dateOnly = appt.date.split('T')[0];
+    const timePart = appt.time.slice(0, 5);
+    const dateTime = new Date(`${dateOnly}T${timePart}`);
+    const formatted = dateTime.toLocaleString(undefined, {
       dateStyle: 'long',
       timeStyle: 'short'
     });
 
-    appointmentDetails.innerHTML = `<p>Appointment on <strong>${formattedDateTime}</strong></p>`;
-    renderResponses(data.responses);
-  } catch {
-    appointmentDetails.innerHTML = `<p style="color:red">Could not format appointment date/time.</p>`;
-  }
+    const container = document.createElement('div');
+    container.className = 'appointment-entry';
+
+    const title = document.createElement('p');
+    title.innerHTML = `<strong>Appointment ${index + 1}:</strong> ${formatted}`;
+    container.appendChild(title);
+
+    const yesBtn = document.createElement('button');
+    yesBtn.textContent = 'Yes';
+    const noBtn = document.createElement('button');
+    noBtn.textContent = 'No';
+
+    const responseDiv = document.createElement('div');
+    const yesList = document.createElement('p');
+    const noList = document.createElement('p');
+
+    const updateLists = () => {
+      const yesVotes = appt.responses.filter(r => r.response === 'yes');
+      const noVotes = appt.responses.filter(r => r.response === 'no');
+      yesList.innerHTML = `✅ Yes (${yesVotes.length}): ${yesVotes.map(r => r.name).join(', ') || 'None'}`;
+      noList.innerHTML = `❌ No (${noVotes.length}): ${noVotes.map(r => r.name).join(', ') || 'None'}`;
+    };
+
+    yesBtn.onclick = async () => await submitResponse(appt.id, 'yes', appt, updateLists);
+    noBtn.onclick = async () => await submitResponse(appt.id, 'no', appt, updateLists);
+
+    container.appendChild(yesBtn);
+    container.appendChild(noBtn);
+    container.appendChild(yesList);
+    container.appendChild(noList);
+
+    appointmentDetails.appendChild(container);
+    updateLists();
+  });
 }
 
-function renderResponses(responses) {
-  responseStats.innerHTML = '';
-
-  if (!responses || responses.length === 0) {
-    responseStats.innerHTML = '<li>No responses yet.</li>';
-    return;
-  }
-
-  const yes = responses.filter(r => r.response === 'yes');
-  const no = responses.filter(r => r.response === 'no');
-
-  if (yes.length) {
-    const li = document.createElement('li');
-    li.textContent = `✅ Yes (${yes.length}): ${yes.map(r => r.name).join(', ')}`;
-    responseStats.appendChild(li);
-  }
-
-  if (no.length) {
-    const li = document.createElement('li');
-    li.textContent = `❌ No (${no.length}): ${no.map(r => r.name).join(', ')}`;
-    responseStats.appendChild(li);
-  }
-}
-
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
+async function submitResponse(appointmentId, responseValue, appt, updateLists) {
   const name = nameInput.value.trim();
-  const answer = e.submitter.dataset.answer;
-
   if (!name) {
-    alert("Please enter your name.");
-    return;
-  }
-
-  if (!['yes', 'no'].includes(answer)) {
-    alert("Please select yes or no.");
+    alert('Please enter your name before voting.');
     return;
   }
 
   const res = await fetch(`/api/appointments/${token}/respond`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, response: answer })
+    body: JSON.stringify({
+      name,
+      responses: [{ appointmentId, response: responseValue }]
+    })
   });
 
   const result = await res.json();
   if (result.success) {
-    nameInput.value = '';
-    loadAppointment();
+    const existing = appt.responses.find(r => r.name === name);
+    if (existing) {
+      existing.response = responseValue;
+    } else {
+      appt.responses.push({ name, response: responseValue });
+    }
+    updateLists();
   } else {
     alert(result.error || 'Error submitting response.');
   }
-});
+}
 
-loadAppointment();
+window.onload = loadAppointment;
