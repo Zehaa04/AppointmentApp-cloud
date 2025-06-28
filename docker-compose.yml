@@ -17,7 +17,8 @@ services:
       - back-network
 
   app1:
-    build: .
+    build:
+      context: ./web
     container_name: app1
     expose:
       - "8999"
@@ -32,7 +33,8 @@ services:
       - back-network
 
   app2:
-    build: .
+    build:
+      context: ./web
     container_name: app2
     expose:
       - "8999"
