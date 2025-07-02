@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: appointment
+spec:
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata: 
+      labels:
+        app: web   
+    spec:
+      containers:
+      - name: web
+        image: appointment-web:latest
+        imagePullPolicy: Never    
+        ports:
+        - name: http
+          containerPort: 8999
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_HOST
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_NAME
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_PORT      
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: PORT  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: appointment
+spec:
+  selector:
+    app: web
+  ports:
+  - name: http
+    port: 8999
+    targetPort: 8999  

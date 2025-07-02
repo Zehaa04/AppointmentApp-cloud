@@ -12,7 +12,7 @@ const pool = new Pool({
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'postgres',
-  port: process.env.DB_PORT || 5432,
+  port: parseInt(process.env.DB_PORT, 10) || 5432,
 });
 
 let retries = 5;
@@ -20,9 +20,10 @@ const connectWithRetry = () => {
   pool.connect()
     .then(client => {
       client.release();
-      app.listen(process.env.PORT || 8999, () => {
-        console.log('Server is running on port', process.env.PORT || 8999);
-      });
+      app.listen(parseInt(process.env.PORT, 10) || 8999
+        , () => {
+          console.log('Server is running on port', (parseInt(process.env.PORT, 10) || 8999));
+        });
     })
     .catch((err) => {
       console.error('DB connection failed, retrying...', err.message);

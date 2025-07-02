@@ -12,7 +12,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - pgdata:/var/lib/pgsql/15/data
+      - /var/lib/postgresql/data
     networks:
       - back-network
 

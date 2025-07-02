@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: appointment
+data:
+  DB_HOST: db
+  DB_USER: postgres
+  DB_NAME: appointmentdb
+  DB_PORT: "5432"
+  PORT: "8999"
+---
+apiVersion: v1  
+kind: Secret
+metadata:
+  name: app-secret
+  namespace: appointment
+stringData:  
+  DB_PASSWORD: postgres
