@@ -1,0 +1,109 @@
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f8f9fa;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+h1, h2 {
+  text-align: center;
+  margin: 24px 0 12px 0;
+  color: #222b45;
+}
+
+#name {
+  display: block;
+  margin: 20px auto 30px auto;
+  padding: 12px 18px;
+  font-size: 1.1em;
+  border: 1.5px solid #bbb;
+  border-radius: 8px;
+  background: #fff;
+  width: 260px;
+  transition: border 0.2s;
+}
+#name:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+#appointmentDetails {
+  max-width: 420px;
+  margin: 0 auto 32px auto;
+}
+
+.appointment-entry {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(44,62,80,0.06);
+  margin: 18px 0;
+  padding: 20px 24px 18px 24px;
+  text-align: left;
+  transition: box-shadow 0.2s;
+}
+.appointment-entry:hover {
+  box-shadow: 0 4px 18px rgba(76,175,80,0.12);
+}
+
+.appointment-entry p {
+  margin: 0 0 10px 0;
+  font-size: 1.08em;
+}
+
+button {
+  display: inline-block;
+  margin: 8px 7px 10px 0;
+  padding: 8px 20px;
+  font-size: 1em;
+  background: #e0e0e0;
+  color: #232323;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  font-weight: 500;
+}
+button:hover {
+  background: #4caf50;
+  color: #fff;
+}
+
+.appointment-entry button {
+  margin-bottom: 5px;
+}
+
+.appointment-entry p:last-child {
+  margin-bottom: 2px;
+}
+
+#responseStats {
+  max-width: 420px;
+  margin: 10px auto 0 auto;
+  padding: 0;
+  list-style: none;
+  font-size: 1.07em;
+}
+
+#responseStats li {
+  background: #fff;
+  margin: 8px 0;
+  padding: 10px 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(44,62,80,0.08);
+  color: #222b45;
+  font-weight: 400;
+}
+
+@media (max-width: 600px) {
+  #appointmentDetails, #responseStats {
+    max-width: 96vw;
+    padding: 0 2vw;
+  }
+  .appointment-entry {
+    padding: 14px 6vw;
+  }
+  #name {
+    width: 80vw;
+  }
+}

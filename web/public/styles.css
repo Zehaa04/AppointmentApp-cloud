@@ -1,3 +1,15 @@
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f8f9fa;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
 .calendar-header {
   display: flex;
   justify-content: center;
@@ -39,3 +51,21 @@
 .day:hover {
   background: #d0e8ff;
 }
+
+button {
+  transition: background 0.2s;
+}
+button:hover {
+  background: #4caf50;
+  color: #fff;
+}
+
+.calendar {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 15px;
+}
+
+
+
