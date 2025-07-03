@@ -35,7 +35,10 @@ function renderCalendar(date) {
 
     div.onclick = () => {
       if (selectedDates.includes(formattedDate)) return;
-      if (selectedDates.length >= 3) return;
+      if (selectedDates.length >= 3) {
+        alert('You cannot select more than 3 dates.');
+        return;
+      }
 
       selectedDates.push(formattedDate);
       div.classList.add('selected');
