@@ -29,6 +29,10 @@ function renderCalendar(date) {
     const formattedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
     div.innerText = day;
 
+    if (selectedDates.includes(formattedDate)) {
+      div.classList.add('selected');
+    }
+
     div.onclick = () => {
       if (selectedDates.includes(formattedDate)) return;
       if (selectedDates.length >= 3) return;
@@ -47,6 +51,7 @@ function renderCalendar(date) {
 
     calendarDiv.appendChild(div);
   }
+
 }
 
 async function proposeTimes() {
