@@ -132,7 +132,10 @@ app.post('/api/appointments/:token/respond', async (req, res) => {
       }
 
       await client.query(
-        'INSERT INTO responses (appointment_id, name, response) VALUES ($1, $2, $3)',
+        `INSERT INTO responses (appointment_id, name, response)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (appointment_id, name)
+         DO UPDATE SET response = EXCLUDED.response`,
         [r.appointmentId, name, r.response]
       );
     }

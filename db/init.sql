@@ -1,6 +1,6 @@
 CREATE DATABASE appointmentdb;
 
-\connect appointmentdb;
+\connect appointmentdb
 
 CREATE TABLE appointments (
   id SERIAL PRIMARY KEY,
@@ -11,8 +11,8 @@ CREATE TABLE appointments (
 
 CREATE TABLE responses (
   id SERIAL PRIMARY KEY,
-  appointment_id INTEGER REFERENCES appointments(id),
+  appointment_id INTEGER NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
   name VARCHAR NOT NULL,
-  response VARCHAR CHECK (response IN ('yes', 'no')) NOT NULL
+  response VARCHAR CHECK (response IN ('yes', 'no')) NOT NULL,
+  CONSTRAINT unique_appointment_name UNIQUE (appointment_id, name)
 );
-
