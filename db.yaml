@@ -1,3 +1,4 @@
+# Service to expose the PostgreSQL database internally in the cluster
 apiVersion: v1
 kind: Service
 metadata:
@@ -12,6 +13,7 @@ spec:
       targetPort: 5432
 
 ---
+# StatefulSet to run a single PostgreSQL pod with persistent storage
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -19,7 +21,7 @@ metadata:
   namespace: appointment
 spec:
   replicas: 1
-  serviceName: db
+  serviceName: db  # required for stable network identity
   selector:
     matchLabels:
       app: db
@@ -28,8 +30,11 @@ spec:
       labels:
         app: db
     spec:
+      # ensures correct file system permissions for mounted volume
       securityContext:
         fsGroup: 26
+
+      # init container to fix ownership of the volume (Amazon Linux base)
       initContainers:
         - name: volume-permission-fix
           image: amazonlinux:2023
@@ -37,12 +42,15 @@ spec:
           volumeMounts:
             - name: db-data
               mountPath: /var/lib/postgresql/data    
+
       containers:
         - name: db
-          image: appointment-db:latest
-          imagePullPolicy: Never
+          image: appointment-db:latest  # local image built from Dockerfile
+          imagePullPolicy: Never        # don't try to pull from a registry
           ports:
             - containerPort: 5432
+
+          # pass database config through env vars
           env:
             - name: PGDATA
               value: /var/lib/postgresql/data
@@ -71,6 +79,8 @@ spec:
                 secretKeyRef:
                   name: app-secret
                   key: DB_PASSWORD
+
+          # probe to check if database is ready
           readinessProbe:
             exec:
               command:
@@ -79,9 +89,12 @@ spec:
                 - postgres
             initialDelaySeconds: 10
             periodSeconds: 10
+
           volumeMounts:
             - name: db-data
               mountPath: /var/lib/postgresql/data
+
+  # Persistent volume claim so data isn't lost when the pod restarts
   volumeClaimTemplates:
     - metadata:
         name: db-data

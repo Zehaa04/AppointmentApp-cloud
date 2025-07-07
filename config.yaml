@@ -10,8 +10,9 @@ data:
   DB_PORT: "5432"
   PORT: "8999"
 ---
+#storing password more secretly
 apiVersion: v1  
-kind: Secret
+kind: Secret 
 metadata:
   name: app-secret
   namespace: appointment

@@ -9,6 +9,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = parseInt(process.env.PORT, 10) || 8999;
 
+// PostgreSQL connection pool setup
 const pool = new Pool({
   host: process.env.DB_HOST || 'db',
   user: process.env.DB_USER || 'postgres',
@@ -17,6 +18,7 @@ const pool = new Pool({
   port: parseInt(process.env.DB_PORT, 10) || 5432,
 });
 
+// Retry mechanism for DB connection before starting server
 let retries = 5;
 const connectWithRetry = () => {
   pool.connect()
@@ -38,6 +40,7 @@ const connectWithRetry = () => {
     });
 };
 
+// Create a new appointment with one or more date/time options
 app.post('/api/appointments', async (req, res) => {
   const { dates } = req.body;
 
@@ -49,7 +52,7 @@ app.post('/api/appointments', async (req, res) => {
     return res.status(400).json({ error: 'Each appointment must include a date and time' });
   }
 
-  const token = uuidv4();
+  const token = uuidv4(); // Unique link token
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -72,10 +75,12 @@ app.post('/api/appointments', async (req, res) => {
   }
 });
 
+// Serve the static HTML response page for a token
 app.get('/respond/:token', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'respond.html'));
 });
 
+// Get all appointments and responses for a given token
 app.get('/api/appointments/:token/respond', async (req, res) => {
   const { token } = req.params;
   try {
@@ -88,6 +93,7 @@ app.get('/api/appointments/:token/respond', async (req, res) => {
       return res.status(404).json({ error: 'Appointment not found' });
     }
 
+    // Attach responses to each appointment
     const appointments = await Promise.all(appointmentResult.rows.map(async appt => {
       const responsesResult = await pool.query(
         'SELECT name, response FROM responses WHERE appointment_id = $1',
@@ -103,10 +109,12 @@ app.get('/api/appointments/:token/respond', async (req, res) => {
   }
 });
 
+// Submit or update user responses to appointment slots
 app.post('/api/appointments/:token/respond', async (req, res) => {
   const { token } = req.params;
   const { name, responses } = req.body;
 
+  // Basic validation
   if (typeof name !== 'string' || name.trim() === '' || !Array.isArray(responses) || responses.length === 0) {
     return res.status(400).json({ error: 'Name and responses are required' });
   }
@@ -131,6 +139,7 @@ app.post('/api/appointments/:token/respond', async (req, res) => {
         return res.status(400).json({ error: 'Invalid appointment ID or response' });
       }
 
+      // Insert or update user vote
       await client.query(
         `INSERT INTO responses (appointment_id, name, response)
          VALUES ($1, $2, $3)
@@ -151,8 +160,10 @@ app.post('/api/appointments/:token/respond', async (req, res) => {
   }
 });
 
+// Root route - simple health check
 app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
+// Start server after DB connection is confirmed
 connectWithRetry();

@@ -1,3 +1,4 @@
+# Deployment to run the Node.js web application
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,11 +15,13 @@ spec:
     spec:
       containers:
       - name: web
-        image: appointment-web:latest
-        imagePullPolicy: Never    
+        image: appointment-web:latest  # built locally using Docker
+        imagePullPolicy: Never         # don’t pull from a registry
         ports:
         - name: http
-          containerPort: 8999
+          containerPort: 8999          # app listens on this port
+
+        # pass database and app config via environment variables
         env:
         - name: DB_HOST
           valueFrom:
@@ -50,7 +53,9 @@ spec:
             configMapKeyRef:
               name: app-config
               key: PORT  
+
 ---
+# Internal service to expose the web app inside the cluster
 apiVersion: v1
 kind: Service
 metadata:
@@ -62,4 +67,4 @@ spec:
   ports:
   - name: http
     port: 8999
-    targetPort: 8999  
+    targetPort: 8999  # forwards to containerPort 8999

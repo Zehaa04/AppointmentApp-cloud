@@ -1,9 +1,12 @@
+// Extract the token from the current URL path
 const token = window.location.pathname.split("/").pop();
+
 const appointmentDetails = document.getElementById('appointmentDetails');
 const nameInput = document.getElementById('name');
 
 let appointments = [];
 
+// Load appointment details and render voting UI
 async function loadAppointment() {
   const res = await fetch(`/api/appointments/${token}/respond`);
   const data = await res.json();
@@ -17,6 +20,7 @@ async function loadAppointment() {
   appointmentDetails.innerHTML = '';
 
   appointments.forEach((appt, index) => {
+    // Format date and time nicely for display
     const dateOnly = appt.date.split('T')[0];
     const timePart = appt.time.slice(0, 5);
     const dateTime = new Date(`${dateOnly}T${timePart}`);
@@ -32,15 +36,18 @@ async function loadAppointment() {
     title.innerHTML = `<strong>Appointment ${index + 1}:</strong> ${formatted}`;
     container.appendChild(title);
 
+    // Create Yes and No buttons for voting
     const yesBtn = document.createElement('button');
     yesBtn.textContent = 'Yes';
     const noBtn = document.createElement('button');
     noBtn.textContent = 'No';
 
+    // Create elements to show who voted yes/no
     const responseDiv = document.createElement('div');
     const yesList = document.createElement('p');
     const noList = document.createElement('p');
 
+    // Function to update name lists under each response
     const updateLists = () => {
       const yesVotes = appt.responses.filter(r => r.response === 'yes');
       const noVotes = appt.responses.filter(r => r.response === 'no');
@@ -48,6 +55,7 @@ async function loadAppointment() {
       noList.innerHTML = `❌ No (${noVotes.length}): ${noVotes.map(r => r.name).join(', ') || 'None'}`;
     };
 
+    // Bind button events to submit vote and update UI
     yesBtn.onclick = async () => await submitResponse(appt.id, 'yes', appt, updateLists);
     noBtn.onclick = async () => await submitResponse(appt.id, 'no', appt, updateLists);
 
@@ -57,10 +65,11 @@ async function loadAppointment() {
     container.appendChild(noList);
 
     appointmentDetails.appendChild(container);
-    updateLists();
+    updateLists(); // Initial population of vote lists
   });
 }
 
+// Submit the user's response to the backend
 async function submitResponse(appointmentId, responseValue, appt, updateLists) {
   const name = nameInput.value.trim();
   if (!name) {
@@ -78,12 +87,14 @@ async function submitResponse(appointmentId, responseValue, appt, updateLists) {
   });
 
   const result = await res.json();
+
+  // If successful, update local appointment response list
   if (result.success) {
     const existing = appt.responses.find(r => r.name === name);
     if (existing) {
-      existing.response = responseValue;
+      existing.response = responseValue; // Overwrite previous vote
     } else {
-      appt.responses.push({ name, response: responseValue });
+      appt.responses.push({ name, response: responseValue }); // Add new vote
     }
     updateLists();
   } else {
@@ -91,4 +102,5 @@ async function submitResponse(appointmentId, responseValue, appt, updateLists) {
   }
 }
 
+// Load the appointment data when page loads
 window.onload = loadAppointment;
