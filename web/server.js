@@ -7,6 +7,8 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+const PORT = parseInt(process.env.PORT, 10) || 8999;
+
 const pool = new Pool({
   host: process.env.DB_HOST || 'db',
   user: process.env.DB_USER || 'postgres',
@@ -20,10 +22,9 @@ const connectWithRetry = () => {
   pool.connect()
     .then(client => {
       client.release();
-      app.listen(parseInt(process.env.PORT, 10) || 8999
-        , () => {
-          console.log('Server is running on port', (parseInt(process.env.PORT, 10) || 8999));
-        });
+      app.listen(PORT, () => {
+        console.log('Server is running on port', PORT);
+      });
     })
     .catch((err) => {
       console.error('DB connection failed, retrying...', err.message);
@@ -49,7 +50,6 @@ app.post('/api/appointments', async (req, res) => {
   }
 
   const token = uuidv4();
-
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -65,7 +65,7 @@ app.post('/api/appointments', async (req, res) => {
     res.json({ token });
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('Database error:', err.message);
+    console.error('Database error in /api/appointments:', err.message);
     res.status(500).json({ error: 'Database error' });
   } finally {
     client.release();
@@ -98,7 +98,7 @@ app.get('/api/appointments/:token/respond', async (req, res) => {
 
     res.json({ appointments });
   } catch (err) {
-    console.error(err.message);
+    console.error('Database error in GET /api/appointments/:token/respond:', err.message);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -107,7 +107,7 @@ app.post('/api/appointments/:token/respond', async (req, res) => {
   const { token } = req.params;
   const { name, responses } = req.body;
 
-  if (!name || !Array.isArray(responses) || responses.length === 0) {
+  if (typeof name !== 'string' || name.trim() === '' || !Array.isArray(responses) || responses.length === 0) {
     return res.status(400).json({ error: 'Name and responses are required' });
   }
 
@@ -125,8 +125,8 @@ app.post('/api/appointments/:token/respond', async (req, res) => {
 
     await client.query('BEGIN');
 
-    for (const r of responses) {
-      if (!validIds.includes(r.appointmentId) || !['yes', 'no'].includes(r.response)) {
+    for (const response of responses) {
+      if (!validIds.includes(response.appointmentId) || !['yes', 'no'].includes(response.response)) {
         await client.query('ROLLBACK');
         return res.status(400).json({ error: 'Invalid appointment ID or response' });
       }
@@ -136,7 +136,7 @@ app.post('/api/appointments/:token/respond', async (req, res) => {
          VALUES ($1, $2, $3)
          ON CONFLICT (appointment_id, name)
          DO UPDATE SET response = EXCLUDED.response`,
-        [r.appointmentId, name, r.response]
+        [response.appointmentId, name, response.response]
       );
     }
 
@@ -144,13 +144,12 @@ app.post('/api/appointments/:token/respond', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error(err.message);
+    console.error('Database error in POST /api/appointments/:token/respond:', err.message);
     res.status(500).json({ error: 'Database error' });
   } finally {
     client.release();
   }
 });
-
 
 app.get('/', (req, res) => {
   res.send('Server is running!');
