@@ -51,10 +51,17 @@ Stop the stack:
 
 **Running on Kubernetes (minikube)**
 
+Run these commands to start minikube and enable ingress:
+```
+minikube start --driver=docker
+minikube addons enable ingress
+```
+
+
 Build images and load into minikube (for local images):
 `./build.sh`
 
-Deploy resources:
+Deploy resources and start:
 ```
 kubectl apply -f namespace.yaml
 kubectl apply -f config.yaml
