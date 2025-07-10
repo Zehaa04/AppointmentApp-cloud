@@ -51,10 +51,14 @@ Stop the stack:
 
 **Running on Kubernetes (minikube)**
 
-Run these commands to start minikube and enable ingress:
+**Optional:** Run `./start.sh` to automate setup.   
+**Note:** You still need to run minikube tunnel manually in another terminal.
+
+**Manual setup:**
+
+Run this command to start minikube and enable addons:
 ```
-minikube start --driver=docker
-minikube addons enable ingress
+minikube start --addons=storage-provisioner,default-storageclass,ingress,registry
 ```
 
 
