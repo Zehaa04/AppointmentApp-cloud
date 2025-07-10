@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: ingress
   namespace: appointment
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
   - host: appointment.sample
