@@ -1,4 +1,4 @@
-**Appointment Coordination App**
+**Appointment Coordination App (work in progress)**
 
 A simple appointment voting platform built with Node.js (Express) and PostgreSQL.
 Containerized with Docker (Amazon Linux 2023 base).
